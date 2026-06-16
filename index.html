@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(circle at 50% 50%, #1a1b35 0%, #0a0b10 100%);
+            color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* 1. MEGA ENTRANCE POP ANIMATION FOR THE MAIN CONTAINER */
+        @keyframes containerPopUp {
+            0% {
+                opacity: 0;
+                transform: scale(0.6) translateY(60px);
+            }
+            65% {
+                transform: scale(1.04) translateY(-10px);
+            }
+            90% {
+                transform: scale(0.98) translateY(2px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes elementFadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .quiz-container {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            width: 100%;
+            max-width: 640px;
+            border-radius: 24px;
+            padding: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 40px rgba(99, 102, 241, 0.1);
+            position: relative;
+            
+            /* Dynamic Entrance Activation */
+            animation: containerPopUp 0.85s cubic-bezier(0.25, 1.1, 0.5, 1.1) forwards !important;
+        }
+
+        /* Front Page Elements Cascading Entry Delays */
+        #start-screen .quiz-header {
+            opacity: 0;
+            animation: elementFadeUp 0.6s ease-out 0.2s forwards !important;
+        }
+
+        #start-screen .info-card {
+            opacity: 0;
+            animation: elementFadeUp 0.6s ease-out 0.4s forwards !important;
+        }
+
+        #start-btn {
+            opacity: 0;
+            animation: containerPopUp 0.6s cubic-bezier(0.25, 1.1, 0.5, 1.1) 0.55s forwards !important;
+        }
+
+        /* Core Structure Screens Setup */
+        .screen {
+            display: none;
+            opacity: 0;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .screen.active-screen {
+            display: flex;
+            opacity: 1;
+        }
+
+        .quiz-header { text-align: center; margin-bottom: 25px; }
+
+        .brain-icon, .trophy-icon {
+            font-size: 55px;
+            background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.4));
+            margin-bottom: 15px;
+        }
+
+        .quiz-header h1, .quiz-header h2 {
+            font-size: 34px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .quiz-header h1 span {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle { color: #9ca3af; font-size: 15px; font-weight: 500; }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-card h3 { font-size: 16px; color: #e5e7eb; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+        .quiz-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        #question-counter { font-size: 13px; color: #9ca3af; font-weight: 500; }
+
+        .timer-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        .question-box h2 { font-size: 20px; font-weight: 700; line-height: 1.5; color: #ffffff; margin-bottom: 25px; }
+        .options-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
+
+        .option-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 16px 20px;
+            text-align: left;
+            color: #d1d5db;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.5);
+            color: #ffffff;
+            transform: translateX(4px);
+        }
+
+        .option-btn.correct { background: rgba(16, 185, 129, 0.15) !important; border-color: #10b981 !important; color: #34d399 !important; }
+        .option-btn.wrong { background: rgba(239, 68, 68, 0.15) !important; border-color: #ef4444 !important; color: #f87171 !important; }
+        .option-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .option-btn.correct.disabled { opacity: 1; }
+
+        .primary-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .hide { display: none !important; }
+
+        .score-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .score-card h1 { font-size: 48px; font-weight: 800; color: #ffffff; margin-top: 10px; }
+        footer { margin-top: 25px; text-align: center; }
+        .branding { font-size: 12px; color: #6b7280; font-weight: 600; }
+
+        /* Dynamic Badge Setup */
+        .subject-badge { padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; display: inline-block; margin-bottom: 8px; }
+        .badge-physics { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+        .badge-chemistry { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .badge-biology { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+        .badge-math { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .badge-english { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .quiz-container.shake-anim { animation: shakeError 0.4s ease; }
+    </style>
+</head>
+<body>
+
+    <div id="main-container" class="quiz-container">
+        <div id="start-screen" class="screen active-screen">
+            <div class="quiz-header">
+                <i class="fa-solid fa-graduation-cap brain-icon"></i>
+                <h1><span>Quiz Portal</span></h1>
+                <p class="subtitle">11th Grade Comprehensive Board Prep</p>
+            </div>
+            <div class="info-card">
+                <h3><i class="fa-solid fa-circle-info"></i> Exam Structure:</h3>
+                <ul style="display: grid; grid-template-columns: 1fr; gap: 8px; list-style: none; color: #9ca3af; font-size: 14px;">
+                    <li><i class="fa-solid fa-atom" style="color: #6366f1; width: 20px;"></i> 25 Physics Questions</li>
+                    <li><i class="fa-solid fa-flask" style="color: #10b981; width: 20px;"></i> 25 Chemistry Questions</li>
+                    <li><i class="fa-solid fa-dna" style="color: #ec4899; width: 20px;"></i> 25 Biology Questions</li>
+                    <li><i class="fa-solid fa-calculator" style="color: #f59e0b; width: 20px;"></i> 25 Math Questions</li>
+                    <li><i class="fa-solid fa-language" style="color: #3b82f6; width: 20px;"></i> 25 English Questions</li>
+                    <li style="margin-top: 8px; font-weight: bold; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; color: #f87171;">
+                        <i class="fa-solid fa-clock"></i> 30 Seconds Per Question
+                    </li>
+                </ul>
+            </div>
+            <button id="start-btn" class="primary-btn">Launch Mock Exam <i class="fa-solid fa-rocket"></i></button>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-top-bar">
+                <div>
+                    <span id="subject-tag" class="subject-badge badge-physics">Physics</span><br>
+                    <span id="question-counter">Question 1 of 125</span>
+                </div>
+                <div class="timer-box">
+                    <i class="fa-solid fa-clock"></i> <span id="timer-sec">30</span>s
+                </div>
+            </div>
+            
+            <div class="progress-bar-container">
+                <div id="progress" class="progress-fill"></div>
+            </div>
+
+            <div class="question-box">
+                <h2 id="question-text">Loading entrance question...</h2>
+            </div>
+
+            <div id="options-container" class="options-grid"></div>
+
+            <button id="next-btn" class="primary-btn hide">Next Question <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+        <div id="result-screen" class="screen">
+            <div class="quiz-header">
+                <i class="fa-solid fa-chart-pie trophy-icon"></i>
+                <h2>Exam Report</h2>
+                <p class="subtitle">Results Overview</p>
+            </div>
+
+            <div class="score-card">
+                <p style="font-size: 13px; letter-spacing: 2px; color: #9ca3af;">FINAL SCORE</p>
+                <h1 id="score-text">0 / 125</h1>
+                <p id="remarks" style="font-weight: 700; margin-top: 15px;">Processing...</p>
+            </div>
+
+            <button id="restart-btn" class="primary-btn">Restart Exam <i class="fa-solid fa-rotate-right"></i></button>
+        </div>
+        
+        <footer>
+            <p class="branding">Made by Mohammad Rayan Khan</p>
+        </footer>
+    </div>
+
+    <script>
+        const rawQuizData = [
+            // === PHYSICS (25 Questions) ===
+            { q: "Which of the following is a base quantity in SI units?", o: ["Force", "Luminous intensity", "Velocity", "Acceleration"], c: 1, s: "Physics" },
+            { q: "The percentage uncertainty in measurement of mass and speed are 2% and 3%. Maximum uncertainty in kinetic energy is:", o: ["5%", "11%", "8%", "6%"], c: 2, s: "Physics" },
+            { q: "Two forces of magnitudes 3N and 4N act on a body. The magnitude of their resultant cannot be:", o: ["1N", "5N", "7N", "0.5N"], c: 3, s: "Physics" },
+            { q: "The dot product of two mutually perpendicular vectors is:", o: ["Maximum", "Zero", "Minimum", "Negative"], c: 1, s: "Physics" },
+            { q: "Area under a velocity-time graph represents:", o: ["Acceleration", "Force", "Displacement", "Work done"], c: 2, s: "Physics" },
+            { q: "A ball is thrown vertically upwards. At the highest point, its acceleration is:", o: ["Zero", "9.8 m/s² downwards", "9.8 m/s² upwards", "Variable"], c: 1, s: "Physics" },
+            { q: "The trajectory (path) of a projectile is a:", o: ["Hyperbola", "Parabola", "Circle", "Straight line"], c: 1, s: "Physics" },
+            { q: "Rocket propulsion is based on the law of conservation of:", o: ["Mass", "Linear momentum", "Angular momentum", "Energy"], c: 1, s: "Physics" },
+            { q: "Work done by a conservative force along a closed path is:", o: ["Maximum", "Infinite", "Zero", "Negative"], c: 2, s: "Physics" },
+            { q: "One kilowatt-hour (kWh) is equal to:", o: ["3.6 MJ", "3.6 kJ", "1000 J", "360 J"], c: 0, s: "Physics" },
+            { q: "Escape velocity from the surface of the Earth is approximately:", o: ["11.2 m/s", "11.2 km/s", "9.8 km/s", "11.2 cm/s"], c: 1, s: "Physics" },
+            { q: "The value of 'g' at the center of the Earth is:", o: ["Infinite", "9.8 m/s²", "Zero", "Doubled"], c: 2, s: "Physics" },
+            { q: "The unit of angular acceleration is:", o: ["rad/s", "rad/s²", "m/s²", "degrees/s"], c: 1, s: "Physics" },
+            { q: "When a body moves in a circle, work done by the centripetal force is:", o: ["Positive", "Negative", "Maximum", "Zero"], c: 3, s: "Physics" },
+            { q: "Moment of inertia of a thin circular hoop or ring of mass M and radius R is:", o: ["1/2 MR²", "MR Calibri", "MR²", "2/5 MR²"], c: 2, s: "Physics" },
+            { q: "The ratio of tensile stress to tensile strain is called:", o: ["Bulk Modulus", "Young's Modulus", "Shear Modulus", "Poisson's Ratio"], c: 1, s: "Physics" },
+            { q: "According to Bernoulli's theorem, where the speed of fluid is high, its pressure is:", o: ["High", "Low", "Zero", "Constant"], c: 1, s: "Physics" },
+            { q: "Terminal velocity of a spherical body falling through a fluid varies directly with:", o: ["Radius", "Square of radius", "Square root of radius", "Inverse of radius"], c: 1, s: "Physics" },
+            { q: "The distance between a node and an adjacent antinode is:", o: ["λ", "λ/2", "λ/4", "3λ/4"], c: 2, s: "Physics" },
+            { q: "The speed of sound is maximum in which of the following media?", o: ["Air", "Water", "Steel", "Vacuum"], c: 2, s: "Physics" },
+            { q: "Light waves are longitudinal waves. This statement is:", o: ["True", "False", "True only in vacuum", "True only in glass"], c: 1, s: "Physics" },
+            { q: "Michelson interferometer can be used to measure:", o: ["Velocity of sound", "Wavelength of light", "Viscosity of liquids", "Pressure of gas"], c: 1, s: "Physics" },
+            { q: "The resolving power of an optical instrument depends inversely upon:", o: ["Focal length", "Diameter of objective", "Wavelength of light", "Magnifying power"], c: 2, s: "Physics" },
+            { q: "First law of thermodynamics is a restatement of the principle of conservation of:", o: ["Mass", "Momentum", "Charge", "Energy"], c: 3, s: "Physics" },
+            { q: "A process in which no heat enters or leaves the system is called:", o: ["Isothermal", "Isobaric", "Isochoric", "Adiabatic"], c: 3, s: "Physics" },
+
+            // === CHEMISTRY (25 Questions) ===
+            { q: "One mole of any gas at STP occupies a volume of:", o: ["22.4 dm³", "2.24 dm³", "224 dm³", "11.2 dm³"], c: 0, s: "Chemistry" },
+            { q: "The number of covalent bonds in 1 mole of water is:", o: ["6.02 x 10²³", "1.204 x 10²⁴", "1.806 x 10²⁴", "3.01 x 10²³"], c: 1, s: "Chemistry" },
+            { q: "Which method is used to separate volatile components from non-volatile impurities?", o: ["Filtration", "Sublimation", "Crystallization", "Solvent extraction"], c: 1, s: "Chemistry" },
+            { q: "A filtration process can be accelerated by using:", o: ["Ordinary funnel", "Fluted filter paper", "Watch glass", "Buchner funnel without suction"], c: 1, s: "Chemistry" },
+            { q: "The value of ideal gas constant R in SI units is:", o: ["0.0821 L atm/mol K", "8.314 J/mol K", "1.987 cal/mol K", "62.4 L torr/mol K"], c: 1, s: "Chemistry" },
+            { q: "Deep sea divers use a mixture of oxygen and which gas for respiration?", o: ["Nitrogen", "Helium", "Argon", "Neon"], c: 1, s: "Chemistry" },
+            { q: "The non-ideal behavior of gases is maximum at:", o: ["High T and Low P", "Low T and High P", "High T and High P", "Low T and Low P"], c: 1, s: "Chemistry" },
+            { q: "The boiling point of water is higher than HF because water has:", o: ["Stronger covalent bonds", "More hydrogen bonds per molecule", "Higher molecular weight", "Van der Waals forces"], c: 1, s: "Chemistry" },
+            { q: "In a face-centered cubic cell, a unit cell contains how many atoms?", o: ["1", "2", "3", "4"], c: 3, s: "Chemistry" },
+            { q: "Ionic solids conduct electricity in which state?", o: ["Solid state", "Molten state only", "Aqueous solution only", "Both molten and aqueous states"], c: 3, s: "Chemistry" },
+            { q: "The charge on an electron was experimentally determined by:", o: ["J.J. Thomson", "Rutherford", "Millikan", "Chadwick"], c: 2, s: "Chemistry" },
+            { q: "The maximum number of electrons in a subshell with l = 2 is:", o: ["2", "6", "10", "14"], c: 2, s: "Chemistry" },
+            { q: "Cathode rays are composed of:", o: ["Protons", "Neutrons", "Positrons", "Electrons"], c: 3, s: "Chemistry" },
+            { q: "The shape of an orbital with azimuthal quantum number l = 1 is:", o: ["Spherical", "Dumbbell", "Double dumbbell", "Complicated"], c: 1, s: "Chemistry" },
+            { q: "Which of the following molecules has a linear geometry?", o: ["H₂O", "CO₂", "NH₃", "BF₃"], c: 1, s: "Chemistry" },
+            { q: "The hybridization of carbon in methane (CH₄) is:", o: ["sp", "sp²", "sp³", "dsp²"], c: 2, s: "Chemistry" },
+            { q: "A bond formed by the mutual sharing of an electron pair provided by only one atom is:", o: ["Ionic", "Covalent", "Coordinate covalent", "Metallic"], c: 2, s: "Chemistry" },
+            { q: "Bomb calorimeter is typically used to measure:", o: ["ΔH", "ΔE", "ΔG", "ΔS"], c: 1, s: "Chemistry" },
+            { q: "For a spontaneous process, the change in Gibbs free energy (ΔG) must be:", o: ["Positive", "Zero", "Negative", "Infinite"], c: 2, s: "Chemistry" },
+            { q: "The pH of a 0.001 M HCl solution is:", o: ["1", "2", "3", "4"], c: 2, s: "Chemistry" },
+            { q: "An aqueous solution of CuSO₄ is:", o: ["Acidic", "Basic", "Neutral", "Amphoteric"], c: 0, s: "Chemistry" },
+            { q: "A solution which resists changes in its pH value is called:", o: ["Saturated solution", "Buffer solution", "Ideal solution", "Normal solution"], c: 1, s: "Chemistry" },
+            { q: "Molarity of a solution is defined as moles of solute per:", o: ["Kg of solvent", "Kg of solution", "Liter of solution", "Liter of solvent"], c: 2, s: "Chemistry" },
+            { q: "The oxidation number of Sulfur in H₂SO₄ is:", o: ["+2", "+4", "+6", "-2"], c: 2, s: "Chemistry" },
+            { q: "The unit of rate constant for a first-order reaction is:", o: ["mol dm⁻³ s⁻¹", "dm³ mol⁻¹ s⁻¹", "s⁻¹", "mol² dm⁻⁶ s⁻¹"], c: 2, s: "Chemistry" },
+
+            // === BIOLOGY (25 Questions) ===
+            { q: "Which organelle is bounded by a single membrane?", o: ["Mitochondria", "Chloroplast", "Lysosome", "Nucleus"], c: 2, s: "Biology" },
+            { q: "Cell wall is absent in which of the following organism groups?", o: ["Plants", "Fungi", "Animals", "Bacteria"], c: 2, s: "Biology" },
+            { q: "The structural backbone of the cell membrane is composed of:", o: ["Proteins", "Phospholipids", "Carbohydrates", "Cholesterol"], c: 1, s: "Biology" },
+            { q: "The most abundant organic molecule in mammals is:", o: ["Water", "Protein", "Lipid", "Carbohydrate"], c: 1, s: "Biology" },
+            { q: "Which of the following is an example of a polysaccharide?", o: ["Glucose", "Sucrose", "Glycogen", "Maltose"], c: 2, s: "Biology" },
+            { q: "Enzymes speed up biochemical reactions by lowering:", o: ["Kinetic energy", "Activation energy", "Potential energy", "Free energy"], c: 1, s: "Biology" },
+            { q: "The non-protein part essential for the proper functioning of an enzyme is called:", o: ["Apoenzyme", "Co-factor", "Co-enzyme", "Substrate"], c: 1, s: "Biology" },
+            { q: "The protein coat of a virus is known as:", o: ["Capsid", "Capsomere", "Envelope", "Peptidoglycan"], c: 0, s: "Biology" },
+            { q: "Bacteriophages are viruses that infect:", o: ["Plants", "Animals", "Bacteria", "Fungi"], c: 2, s: "Biology" },
+            { q: "The cell wall of bacteria is made up of:", o: ["Cellulose", "Chitin", "Peptidoglycan", "Lignin"], c: 2, s: "Biology" },
+            { q: "Malaria is caused by which microorganism?", o: ["Mosquito", "Plasmodium", "Amoeba", "Virus"], c: 1, s: "Biology" },
+            { q: "The photosynthetic pigments are located in which part of the chloroplast?", o: ["Stroma", "Thylakoid membranes", "Outer membrane", "Matrix"], c: 1, s: "Biology" },
+            { q: "The end product of glycolysis during cellular respiration is:", o: ["Acetyl-CoA", "Citric acid", "Pyruvate", "Lactic acid"], c: 2, s: "Biology" },
+            { q: "How many net ATP molecules are produced directly in glycolysis?", o: ["2", "4", "36", "38"], c: 0, s: "Biology" },
+            { q: "Amoeba moves with the help of structural extensions called:", o: ["Cilia", "Flagella", "Pseudodia", "Tentacles"], c: 2, s: "Biology" },
+            { q: "The cell wall of fungi is distinctively composed of:", o: ["Cellulose", "Chitin", "Pectin", "Glycogen"], c: 1, s: "Biology" },
+            { q: "Which group of plants is commonly referred to as vascular cryptogams?", o: ["Bryophytes", "Pteridophytes", "Gymnosperms", "Angiosperms"], c: 1, s: "Biology" },
+            { q: "The dominant generation in bryophytes is:", o: ["Gametophyte", "Sporophyte", "Prothallus", "Capsule"], c: 0, s: "Biology" },
+            { q: "Double fertilization is a unique characteristic feature of:", o: ["Bryophytes", "Pteridophytes", "Gymnosperms", "Angiosperms"], c: 3, s: "Biology" },
+            { q: "Flame cells are structural parts of the excretory system in:", o: ["Earthworms", "Flatworms (Platyhelminthes)", "Insects", "Starfish"], c: 1, s: "Biology" },
+            { q: "Which animal phylum possesses a water vascular system?", o: ["Arthropoda", "Annelida", "Echinodermata", "Mollusca"], c: 2, s: "Biology" },
+            { q: "Digestion of starch begins first in which part of the human body?", o: ["Stomach", "Oral cavity", "Duodenum", "Ileum"], c: 1, s: "Biology" },
+            { q: "Exchange of gases in the human lungs takes place across the walls of:", o: ["Bronchi", "Bronchioles", "Alveoli", "Trachea"], c: 2, s: "Biology" },
+            { q: "The pace-maker of the human heart is technically called:", o: ["AV node", "SA node", "Purkinje fibers", "Bundle of His"], c: 1, s: "Biology" },
+            { q: "Universal recipient blood group type is:", o: ["O positive", "AB positive", "A negative", "B positive"], c: 1, s: "Biology" },
+
+            // === MATH (25 Questions) ===
+            { q: "If A and B are disjoint sets, then their intersection (A ∩ B) is:", o: ["A", "B", "Empty Set (∅)", "Universal Set"], c: 2, s: "Math" },
+            { q: "The multiplicative inverse of the complex number i is:", o: ["1", "-1", "i", "-i"], c: 3, s: "Math" },
+            { q: "The value of i¹³ is equal to:", o: ["1", "-1", "i", "-i"], c: 2, s: "Math" },
+            { q: "If a matrix A is symmetric, then its transpose Aᵀ is equal to:", o: ["-A", "A", "A⁻¹", "Identity Matrix"], c: 1, s: "Math" },
+            { q: "A square matrix A is singular if its determinant |A| is:", o: ["1", "-1", "Zero", "Positive"], c: 2, s: "Math" },
+            { q: "The roots of the equation x² + 5x + 6 = 0 are:", o: ["2, 3", "-2, -3", "1, 6", "-1, -6"], c: 1, s: "Math" },
+            { q: "The discriminant of the quadratic equation ax² + bx + c = 0 is given by:", o: ["b² + 4ax", "b² - 4ac", "4ac - b²", "√b²-4ac"], c: 1, s: "Math" },
+            { q: "The cube roots of unity are 1, ω, and ω². What is the value of 1 + ω + ω²?", o: ["1", "-1", "Zero", "3"], c: 2, s: "Math" },
+            { q: "The partial fractions of 1 / (x(x+1)) will be of the form:", o: ["A/x + B/(x+1)", "(Ax+B)/(x²+1)", "A/x + B/x²", "A/(x+1)"], c: 0, s: "Math" },
+            { q: "The nth term of an Arithmetic Progression with first term 'a' and common difference 'd' is:", o: ["a + nd", "a + (n-1)d", "a + (n+1)d", "n(a+d)"], c: 1, s: "Math" },
+            { q: "The arithmetic mean between two numbers 'a' and 'b' is:", o: ["ab", "√(ab)", "(a+b)/2", "(a-b)/2"], c: 2, s: "Math" },
+            { q: "The sum of an infinite geometric series is valid only if the common ratio 'r' satisfies:", o: ["|r| > 1", "|r| < 1", "r = 1", "r = 0"], c: 1, s: "Math" },
+            { q: "How many permutations can be formed using all letters of the word 'CAT'?", o: ["3", "6", "9", "1"], c: 1, s: "Math" },
+            { q: "The value of 5P2 is equal to:", o: ["10", "20", "60", "120"], c: 1, s: "Math" },
+            { q: "The total number of subsets of a set containing 4 elements is:", o: ["4", "8", "16", "32"], c: 2, s: "Math" },
+            { q: "The expansion of (1 + x)ⁿ has n + 1 terms if 'n' is a:", o: ["Negative integer", "Fraction", "Positive integer", "Real number"], c: 2, s: "Math" },
+            { q: "The number of degrees in one radian is approximately equal to:", o: ["45°", "57.3°", "60°", "90°"], c: 1, s: "Math" },
+            { q: "The value of identity sin²θ + cos²θ is equal to:", o: ["0", "1", "-1", "2"], c: 1, s: "Math" },
+            { q: "The fundamental period of function sin(x) is:", o: ["π", "2π", "π/2", "32π"], c: 1, s: "Math" },
+            { q: "The domain of the principal sine function y = sin(x) is restricted to:", o: ["[0, π]", "[-π, π]", "[-π/2, π/2]", "[-1, 1]"], c: 2, s: "Math" },
+            { q: "By law of cosines, cos(α) is equal to:", o: ["(b²+c²-a²)/2bc", "(a²+b²-c²)/2ab", "(a²+c²-b²)/2ac", "b²+c²-2bc"], c: 0, s: "Math" },
+            { q: "The radius of an inscribed circle (r) inside a triangle is given by formula:", o: ["abc/4Δ", "Δ/s", "s/Δ", "r = s - a"], c: 1, s: "Math" },
+            { q: "The value of inverse trigonometric function sin⁻¹(1/2) is:", o: ["30°", "45°", "60°", "90°"], c: 0, s: "Math" },
+            { q: "The solution of equation sin(x) = 0 in the interval [0, 2π] has how many solutions?", o: ["1", "2", "3", "4"], c: 2, s: "Math" },
+            { q: "The value of cos⁻¹(-x) is always equal to:", o: ["cos⁻¹(x)", "-cos⁻¹(x)", "π - cos⁻¹(x)", "π + cos⁻¹(x)"], c: 2, s: "Math" },
+
+            // === ENGLISH (25 Questions) ===
+            { q: "Identify the correct sentence structure:", o: ["He has arrived yesterday.", "He arrived yesterday.", "He had arrived yesterday.", "He arrives yesterday."], c: 1, s: "English" },
+            { q: "Choose the correct spelling:", o: ["Accomodate", "Accommodate", "Acomodate", "Accomodait"], c: 1, s: "English" },
+            { q: "What is the synonym of 'Meticulous'?", o: ["Careless", "Careful and precise", "Lazy", "Aggressive"], c: 1, s: "English" },
+            { q: "What is the antonym of 'Transient'?", o: ["Temporary", "Permanent", "Brief", "Quick"], c: 1, s: "English" },
+            { q: "Complete the conditional sentence: 'If I ___ a king, I would help the poor.'", o: ["was", "am", "were", "had been"], c: 2, s: "English" },
+            { q: "Choose the correct preposition: 'She is proficient ___ playing piano.'", o: ["at", "in", "with", "on"], c: 1, s: "English" },
+            { q: "Identify the part of speech of the bracketed word: 'The [beautiful] scenery caught our eyes.'", o: ["Noun", "Adjective", "Adverb", "Verb"], c: 1, s: "English" },
+            { q: "Change into passive voice: 'The chef cooked the food.'", o: ["The food is cooked by chef.", "The food was cooked by the chef.", "The food had been cooked by chef.", "The chef was cooking food."], c: 1, s: "English" },
+            { q: "Choose the correctly punctuated sentence:", o: ["Wow that is an amazing painting.", "Wow! That is an amazing painting.", "Wow, that, is an amazing painting.", "Wow! that is an amazing painting."], c: 1, s: "English" },
+            { q: "What does the idiom 'Crying over spilled milk' mean?", o: ["Crying for food", "Regretting past unchangeable losses", "Fixing a mistake", "Spilling milk intentionally"], c: 1, s: "English" },
+            { q: "Identify the abstract noun:", o: ["Table", "Honesty", "Water", "Teacher"], c: 1, s: "English" },
+            { q: "Select the sentence with correct subject-verb agreement:", o: ["Either the teacher or the students is wrong.", "Either the teacher or the students are wrong.", "Either the teacher or the students was wrong.", "Each of the boys play football."], c: 1, s: "English" },
+            { q: "What is the meaning of 'Benevolent'?", o: ["Cruel", "Kind and helpful", "Rich", "Selfish"], c: 1, s: "English" },
+            { q: "Choose the antonym of 'Arrogant'?", o: ["Proud", "Humble", "Smart", "Rude"], c: 1, s: "English" },
+            { q: "Identify the word that means 'a person who looks at the bright side of things':", o: ["Pessimist", "Optimist", "Atheist", "Introvert"], c: 1, s: "English" },
+            { q: "Complete the sentence: 'Neither of the two paths ___ safe.'", o: ["are", "is", "were", "have been"], c: 1, s: "English" },
+            { q: "What is the gerund in the sentence: 'Swimming is a great exercise.'", o: ["Exercise", "Is", "Great", "Swimming"], c: 3, s: "English" },
+            { q: "Choose the correct article: 'He is ___ honorable man.'", o: ["a", "an", "the", "no article"], c: 1, s: "English" },
+            { q: "Identify the conjunction in: 'I ran fast, yet I missed the bus.'", o: ["Fast", "Ran", "Yet", "Missed"], c: 2, s: "English" },
+            { q: "What is the plural of 'Criterion'?", o: ["Criterions", "Criteria", "Criterias", "Criteriones"], c: 1, s: "English" },
+            { q: "Choose the word with the correct prefix to mean 'not regular':", o: ["Unregular", "Irregular", "Disregular", "Imregular"], c: 1, s: "English" },
+            { q: "Identify the sentence written in the future perfect tense:", o: ["I will go tomorrow.", "I will have finished my work by 5 PM.", "I will be studying.", "I have done my work."], c: 1, s: "English" },
+            { q: "What is the meaning of the word 'Exaggerate'?", o: ["To shrink something", "To state something over reality", "To explain calmly", "To lie completely"], c: 1, s: "English" },
+            { q: "Choose the correct synonym of 'Fragile'?", o: ["Strong", "Breakable/Delicate", "Heavy", "Flexible"], c: 1, s: "English" },
+            { q: "Complete the sentence: 'Hardly had I stepped out ___ it started raining.'", o: ["then", "than", "when", "that"], c: 2, s: "English" }
+        ];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        let quizData = [];
+        const mainContainer = document.getElementById('main-container');
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const subjectTag = document.getElementById('subject-tag');
+        const questionCounter = document.getElementById('question-counter');
+        const timerSec = document.getElementById('timer-sec');
+        const progressFill = document.getElementById('progress');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreText = document.getElementById('score-text');
+        const remarksText = document.getElementById('remarks');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timerInterval;
+        let timeLeft = 30;
+
+        function startQuiz() {
+            quizData = shuffleArray([...rawQuizData]);
+            switchScreen(startScreen, quizScreen);
+            currentQuestionIndex = 0;
+            score = 0;
+            loadQuestion();
+        }
+
+        function switchScreen(hideScreen, showScreen) {
+            hideScreen.classList.remove('active-screen');
+            setTimeout(() => {
+                showScreen.classList.add('active-screen');
+            }, 150);
+        }
+
+        function loadQuestion() {
+            clearInterval(timerInterval);
+            timeLeft = 30;
+            timerSec.innerText = timeLeft;
+            nextBtn.classList.add('hide');
+            optionsContainer.innerHTML = '';
+            startTimer();
+
+            const currentQuiz = quizData[currentQuestionIndex];
+            
+            subjectTag.innerText = currentQuiz.s;
+            subjectTag.className = "subject-badge"; 
+            subjectTag.classList.add("badge-" + currentQuiz.s.toLowerCase());
+
+            questionCounter.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+            progressFill.style.width = `${((currentQuestionIndex + 1) / quizData.length) * 100}%`;
+            questionText.innerText = currentQuiz.q;
+
+            currentQuiz.o.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.classList.add('option-btn');
+                button.innerText = option;
+                button.addEventListener('click', () => selectOption(button, index));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerSec.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    autoTimeoutReveal();
+                }
+            }, 1000);
+        }
+
+        function selectOption(selectedBtn, index) {
+            clearInterval(timerInterval);
+            const correctAnswerIndex = quizData[currentQuestionIndex].c;
+            const allButtons = optionsContainer.querySelectorAll('.option-btn');
+
+            if (index === correctAnswerIndex) {
+                selectedBtn.classList.add('correct');
+                score++;
+            } else {
+                selectedBtn.classList.add('wrong');
+                mainContainer.classList.add('shake-anim');
+                setTimeout(() => mainContainer.classList.remove('shake-anim'), 400);
+                allButtons[correctAnswerIndex].classList.add('correct');
+            }
+            allButtons.forEach(btn => btn.classList.add('disabled'));
+            nextBtn.classList.remove('hide');
+        }
+
+        function autoTimeoutReveal() {
+            const correctAnswerIndex = quizData[currentQuestionIndex].c;
+            const allButtons = optionsContainer.querySelectorAll('.option-btn');
+            mainContainer.classList.add('shake-anim');
+            setTimeout(() => mainContainer.classList.remove('shake-anim'), 400);
+            allButtons[correctAnswerIndex].classList.add('correct');
+            allButtons.forEach(btn => btn.classList.add('disabled'));
+            nextBtn.classList.remove('hide');
+        }
+
+        function handleNext() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            switchScreen(quizScreen, resultScreen);
+            scoreText.innerText = `${score} / ${quizData.length}`;
+            const ratio = score / quizData.length;
+            
+            if (ratio === 1) {
+                remarksText.innerText = "Absolute Genius! 🚀 Perfect Board Score!";
+                remarksText.style.color = "#10b981";
+            } else if (ratio >= 0.7) {
+                remarksText.innerText = "Excellent Score! Highly Competitive. 👍";
+                remarksText.style.color = "#6366f1";
+            } else if (ratio >= 0.4) {
+                remarksText.innerText = "Clear Pass. Needs selective revision. 🧠";
+                remarksText.style.color = "#f59e0b";
+            } else {
+                remarksText.innerText = "Low score. Re-read 11th Grade Chapters thoroughly. 📚";
+                remarksText.style.color = "#ef4444";
+            }
+        }
+
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', handleNext);
+        restartBtn.addEventListener('click', startQuiz);
+    </script>
+</body>
+</html>
