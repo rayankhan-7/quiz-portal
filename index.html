@@ -28,7 +28,7 @@
             overflow-x: hidden;
         }
 
-        /* 1. MEGA ENTRANCE POP ANIMATION FOR THE MAIN CONTAINER */
+        /* MEGA ENTRANCE POP ANIMATION FOR THE MAIN CONTAINER */
         @keyframes containerPopUp {
             0% {
                 opacity: 0;
@@ -68,8 +68,6 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 40px rgba(99, 102, 241, 0.1);
             position: relative;
-            
-            /* Dynamic Entrance Activation */
             animation: containerPopUp 0.85s cubic-bezier(0.25, 1.1, 0.5, 1.1) forwards !important;
         }
 
@@ -84,12 +82,14 @@
             animation: elementFadeUp 0.6s ease-out 0.4s forwards !important;
         }
 
-        #start-btn {
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             opacity: 0;
-            animation: containerPopUp 0.6s cubic-bezier(0.25, 1.1, 0.5, 1.1) 0.55s forwards !important;
+            animation: elementFadeUp 0.6s ease-out 0.55s forwards !important;
         }
 
-        /* Core Structure Screens Setup */
         .screen {
             display: none;
             opacity: 0;
@@ -217,6 +217,11 @@
             box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
         }
 
+        .medical-btn {
+            background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.3);
+        }
+
         .hide { display: none !important; }
 
         .score-card {
@@ -232,7 +237,6 @@
         footer { margin-top: 25px; text-align: center; }
         .branding { font-size: 12px; color: #6b7280; font-weight: 600; }
 
-        /* Dynamic Badge Setup */
         .subject-badge { padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; display: inline-block; margin-bottom: 8px; }
         .badge-physics { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
         .badge-chemistry { background: rgba(16, 185, 129, 0.2); color: #34d399; }
@@ -258,26 +262,29 @@
                 <p class="subtitle">11th Grade Comprehensive Board Prep</p>
             </div>
             <div class="info-card">
-                <h3><i class="fa-solid fa-circle-info"></i> Exam Structure:</h3>
+                <h3><i class="fa-solid fa-circle-info"></i> Select Your Stream (100 MCQs Total):</h3>
                 <ul style="display: grid; grid-template-columns: 1fr; gap: 8px; list-style: none; color: #9ca3af; font-size: 14px;">
                     <li><i class="fa-solid fa-atom" style="color: #6366f1; width: 20px;"></i> 25 Physics Questions</li>
                     <li><i class="fa-solid fa-flask" style="color: #10b981; width: 20px;"></i> 25 Chemistry Questions</li>
-                    <li><i class="fa-solid fa-dna" style="color: #ec4899; width: 20px;"></i> 25 Biology Questions</li>
-                    <li><i class="fa-solid fa-calculator" style="color: #f59e0b; width: 20px;"></i> 25 Math Questions</li>
                     <li><i class="fa-solid fa-language" style="color: #3b82f6; width: 20px;"></i> 25 English Questions</li>
+                    <li style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px;"><i class="fa-solid fa-dna" style="color: #ec4899; width: 20px;"></i> 25 Biology Questions <strong>(Pre-Medical Only)</strong></li>
+                    <li><i class="fa-solid fa-calculator" style="color: #f59e0b; width: 20px;"></i> 25 Math Questions <strong>(Pre-Engineering Only)</strong></li>
                     <li style="margin-top: 8px; font-weight: bold; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; color: #f87171;">
                         <i class="fa-solid fa-clock"></i> 30 Seconds Per Question
                     </li>
                 </ul>
             </div>
-            <button id="start-btn" class="primary-btn">Launch Mock Exam <i class="fa-solid fa-rocket"></i></button>
+            <div class="btn-group">
+                <button id="start-med-btn" class="primary-btn medical-btn">Launch Pre-Medical <i class="fa-solid fa-stethoscope"></i></button>
+                <button id="start-eng-btn" class="primary-btn">Launch Pre-Engineering <i class="fa-solid fa-compass-drafting"></i></button>
+            </div>
         </div>
 
         <div id="quiz-screen" class="screen">
             <div class="quiz-top-bar">
                 <div>
                     <span id="subject-tag" class="subject-badge badge-physics">Physics</span><br>
-                    <span id="question-counter">Question 1 of 125</span>
+                    <span id="question-counter">Question 1 of 100</span>
                 </div>
                 <div class="timer-box">
                     <i class="fa-solid fa-clock"></i> <span id="timer-sec">30</span>s
@@ -301,12 +308,12 @@
             <div class="quiz-header">
                 <i class="fa-solid fa-chart-pie trophy-icon"></i>
                 <h2>Exam Report</h2>
-                <p class="subtitle">Results Overview</p>
+                <p class="subtitle" id="result-stream-title">Results Overview</p>
             </div>
 
             <div class="score-card">
                 <p style="font-size: 13px; letter-spacing: 2px; color: #9ca3af;">FINAL SCORE</p>
-                <h1 id="score-text">0 / 125</h1>
+                <h1 id="score-text">0 / 100</h1>
                 <p id="remarks" style="font-weight: 700; margin-top: 15px;">Processing...</p>
             </div>
 
@@ -368,7 +375,7 @@
             { q: "Bomb calorimeter is typically used to measure:", o: ["ΔH", "ΔE", "ΔG", "ΔS"], c: 1, s: "Chemistry" },
             { q: "For a spontaneous process, the change in Gibbs free energy (ΔG) must be:", o: ["Positive", "Zero", "Negative", "Infinite"], c: 2, s: "Chemistry" },
             { q: "The pH of a 0.001 M HCl solution is:", o: ["1", "2", "3", "4"], c: 2, s: "Chemistry" },
-            { q: "An aqueous solution of CuSO₄ is:", o: ["Acidic", "Basic", "Neutral", "Amphoteric"], c: 0, s: "Chemistry" },
+          { q: "An aqueous solution of CuSO₄ is:", o: ["Acidic", "Basic", "Neutral", "Amphoteric"], c: 0, s: "Chemistry" },
             { q: "A solution which resists changes in its pH value is called:", o: ["Saturated solution", "Buffer solution", "Ideal solution", "Normal solution"], c: 1, s: "Chemistry" },
             { q: "Molarity of a solution is defined as moles of solute per:", o: ["Kg of solvent", "Kg of solution", "Liter of solution", "Liter of solvent"], c: 2, s: "Chemistry" },
             { q: "The oxidation number of Sulfur in H₂SO₄ is:", o: ["+2", "+4", "+6", "-2"], c: 2, s: "Chemistry" },
@@ -469,7 +476,8 @@
         const startScreen = document.getElementById('start-screen');
         const quizScreen = document.getElementById('quiz-screen');
         const resultScreen = document.getElementById('result-screen');
-        const startBtn = document.getElementById('start-btn');
+        const startMedBtn = document.getElementById('start-med-btn');
+        const startEngBtn = document.getElementById('start-eng-btn');
         const nextBtn = document.getElementById('next-btn');
         const restartBtn = document.getElementById('restart-btn');
         const subjectTag = document.getElementById('subject-tag');
@@ -480,14 +488,26 @@
         const optionsContainer = document.getElementById('options-container');
         const scoreText = document.getElementById('score-text');
         const remarksText = document.getElementById('remarks');
+        const resultStreamTitle = document.getElementById('result-stream-title');
 
         let currentQuestionIndex = 0;
         let score = 0;
         let timerInterval;
         let timeLeft = 30;
+        let selectedStream = ""; // Stores "medical" or "engineering"
 
-        function startQuiz() {
-            quizData = shuffleArray([...rawQuizData]);
+        function startQuiz(stream) {
+            selectedStream = stream;
+            
+            // Filter data based on selected stream
+            let filteredData = [];
+            if (stream === "medical") {
+                filteredData = rawQuizData.filter(item => item.s !== "Math");
+            } else if (stream === "engineering") {
+                filteredData = rawQuizData.filter(item => item.s !== "Biology");
+            }
+
+            quizData = shuffleArray([...filteredData]);
             switchScreen(startScreen, quizScreen);
             currentQuestionIndex = 0;
             score = 0;
@@ -578,6 +598,14 @@
 
         function showResults() {
             switchScreen(quizScreen, resultScreen);
+            
+            // Set dynamic stream header text on result screen
+            if (selectedStream === "medical") {
+                resultStreamTitle.innerText = "Pre-Medical Results Overview";
+            } else {
+                resultStreamTitle.innerText = "Pre-Engineering Results Overview";
+            }
+
             scoreText.innerText = `${score} / ${quizData.length}`;
             const ratio = score / quizData.length;
             
@@ -596,9 +624,12 @@
             }
         }
 
-        startBtn.addEventListener('click', startQuiz);
+        startMedBtn.addEventListener('click', () => startQuiz('medical'));
+        startEngBtn.addEventListener('click', () => startQuiz('engineering'));
         nextBtn.addEventListener('click', handleNext);
-        restartBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', () => {
+            switchScreen(resultScreen, startScreen);
+        });
     </script>
 </body>
 </html>
