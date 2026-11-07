@@ -274,6 +274,13 @@
                     </li>
                 </ul>
             </div>
+            <div class="info-card" style="margin-bottom: 20px;">
+                <h3><i class="fa-solid fa-user"></i> Enter Your Name:</h3>
+                <input type="text" id="student-name" placeholder="Type your full name"
+                    maxlength="60" autocomplete="name"
+                    style="width:100%; padding:14px 16px; border-radius:12px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#ffffff; font-size:15px; outline:none;">
+                <p id="name-error" style="display:none; color:#f87171; font-size:13px; margin-top:8px;">Please enter your name before starting the quiz.</p>
+            </div>
             <div class="btn-group">
                 <button id="start-med-btn" class="primary-btn medical-btn">Launch Pre-Medical <i class="fa-solid fa-stethoscope"></i></button>
                 <button id="start-eng-btn" class="primary-btn">Launch Pre-Engineering <i class="fa-solid fa-compass-drafting"></i></button>
@@ -308,6 +315,7 @@
             <div class="quiz-header">
                 <i class="fa-solid fa-chart-pie trophy-icon"></i>
                 <h2>Exam Report</h2>
+                <p class="subtitle" id="result-student-name" style="margin-bottom:6px;"></p>
                 <p class="subtitle" id="result-stream-title">Results Overview</p>
             </div>
 
@@ -489,6 +497,10 @@
         const scoreText = document.getElementById('score-text');
         const remarksText = document.getElementById('remarks');
         const resultStreamTitle = document.getElementById('result-stream-title');
+        const studentNameInput = document.getElementById('student-name');
+        const nameError = document.getElementById('name-error');
+        const resultStudentName = document.getElementById('result-student-name');
+        let studentName = "";
 
         let currentQuestionIndex = 0;
         let score = 0;
@@ -497,6 +509,13 @@
         let selectedStream = ""; // Stores "medical" or "engineering"
 
         function startQuiz(stream) {
+            studentName = studentNameInput.value.trim();
+            if (!studentName) {
+                nameError.style.display = 'block';
+                studentNameInput.focus();
+                return;
+            }
+            nameError.style.display = 'none';
             selectedStream = stream;
             
             // Filter data based on selected stream
@@ -598,6 +617,7 @@
 
         function showResults() {
             switchScreen(quizScreen, resultScreen);
+            resultStudentName.innerText = `Student: ${studentName}`;
             
             // Set dynamic stream header text on result screen
             if (selectedStream === "medical") {
@@ -623,6 +643,10 @@
                 remarksText.style.color = "#ef4444";
             }
         }
+
+        studentNameInput.addEventListener('input', () => {
+            if (studentNameInput.value.trim()) nameError.style.display = 'none';
+        });
 
         startMedBtn.addEventListener('click', () => startQuiz('medical'));
         startEngBtn.addEventListener('click', () => startQuiz('engineering'));
